@@ -1,5 +1,5 @@
 # Installation
-Follow instructions (here)[https://github.com/homenc/HElib/blob/master/INSTALL.md].
+Follow instructions [here](https://github.com/homenc/HElib/blob/master/INSTALL.md).
 
 One thing that caught me off guard is that it will be installed in `/usr/local/helib_pack`. To get it to install in `/usr/local`, set `PACKAGE_DIR=/usr/local`
 
@@ -10,7 +10,7 @@ Then compile:
 `g++ BGV_country_db_lookup.cpp -l helib -l ntl`
 
 # Database Lookup Example
-The code is adapted from (here)[https://github.com/homenc/HElib/tree/master/examples/BGV_country_db_lookup].
+The code is adapted from [here](https://github.com/homenc/HElib/tree/master/examples/BGV_country_db_lookup).
 
 # Extensions
 
