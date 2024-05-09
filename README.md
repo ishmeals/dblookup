@@ -1,7 +1,7 @@
 # Installation
 Follow instructions [here](https://github.com/homenc/HElib/blob/master/INSTALL.md).
 
-One thing that caught me off guard is that it will be installed in `/usr/local/helib_pack`. To get it to install in `/usr/local`, set `PACKAGE_DIR=/usr/local`
+One thing that caught me off guard is that it will be installed in `/usr/local/helib_pack/`. To get it to install in `/usr/local/`, set `PACKAGE_DIR=/usr/local/`
 
 Don't forget to:
 `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib`
@@ -13,6 +13,14 @@ Then compile:
 The code is adapted from [here](https://github.com/homenc/HElib/tree/master/examples/BGV_country_db_lookup).
 
 # Extensions
+## Fuzzy matching
+We've adapted the logic to still find matches if there is a one character typo.
+For example if querying `Germany`, valid queries include: `germany`, `Bermany`, `German`
+
+## Multiple hits?
+Now, a query of `Iceland` matches with both `Iceland` and `Ireland`, producing a garbled result of `WXTPLvik`.
+We can acutally see the tail end of `Reykjavik`.
+
 
 # Reflection
 

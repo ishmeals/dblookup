@@ -273,7 +273,7 @@ int main(int argc, char* argv[])
   /************ Perform the database search ************/
 
   HELIB_NTIMER_START(timer_QuerySearch);
-  std::vector<helib::Ctxt> mask;
+  std::vector<helib::Ctxt> mask, count;
   mask.reserve(country_db.size());
   for (const auto& encrypted_pair : encrypted_country_db) {
     helib::Ctxt mask_entry = encrypted_pair.first; // Copy of database key
@@ -281,11 +281,26 @@ int main(int argc, char* argv[])
     mask_entry.power(p - 1);                       // Fermat's little theorem
     mask_entry.negate();                           // Negate the ciphertext
     mask_entry.addConstant(NTL::ZZX(1));           // 1 - mask = 0 or 1
+
     // Create a vector of copies of the mask
-    std::vector<helib::Ctxt> rotated_masks(ea.size(), mask_entry);
+    std::vector<helib::Ctxt> rotated_masks(ea.size()-1, mask_entry);
     for (int i = 1; i < rotated_masks.size(); i++)
       ea.rotate(rotated_masks[i], i);             // Rotate each of the masks
     totalProduct(mask_entry, rotated_masks);      // Multiply each of the masks
+
+    std::vector<helib::Ctxt> rotated_masks2(ea.size(), mask_entry);
+    for (int i = 1; i < rotated_masks2.size(); i++) {
+      ea.rotate(rotated_masks2[i], i);
+	  rotated_masks2[0] += rotated_masks2[i];
+	}
+	mask_entry = rotated_masks2[0];
+    mask_entry.power(p - 1);
+
+	// helib::Ptxt<helib::BGV> temp(context);
+	// secret_key.Decrypt(temp, mask_entry);
+	// std::cout << "temp: " << temp << std::endl;
+
+	count.push_back(mask_entry);
     mask_entry.multiplyBy(encrypted_pair.second); // multiply mask with values
     mask.push_back(mask_entry);
   }
@@ -296,6 +311,9 @@ int main(int argc, char* argv[])
   helib::Ctxt value = mask[0];
   for (int i = 1; i < mask.size(); i++)
     value += mask[i];
+  helib::Ctxt count_value = count[0];
+  for (int i = 1; i < count.size(); i++)
+	count_value += count[i];
 
   HELIB_NTIMER_STOP(timer_QuerySearch);
 
@@ -304,6 +322,8 @@ int main(int argc, char* argv[])
   HELIB_NTIMER_START(timer_DecryptQueryResult);
   helib::Ptxt<helib::BGV> plaintext_result(context);
   secret_key.Decrypt(plaintext_result, value);
+  helib::Ptxt<helib::BGV> count_result(context);
+  secret_key.Decrypt(count_result, count_value);
   HELIB_NTIMER_STOP(timer_DecryptQueryResult);
 
   // Convert from ASCII to a string
@@ -320,6 +340,8 @@ int main(int argc, char* argv[])
     helib::printNamedTimer(std::cout, "timer_DecryptQueryResult");
     std::cout << std::endl;
   }
+
+  std::cout << "Total number of matches: " << count_result[0] << std::endl;
 
   if (string_result.at(0) == 0x00) {
     string_result =
